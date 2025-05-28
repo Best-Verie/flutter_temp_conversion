@@ -127,7 +127,7 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
                     ElevatedButton.icon(
                       onPressed: _convert,
                       icon: const Icon(Icons.calculate),
-                      label: const Text('Convert'),
+                      label: const Text('Convert Temperature'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
                       ),
@@ -138,7 +138,7 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Conversion History',
+              'History',
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
