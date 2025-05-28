@@ -72,7 +72,7 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Temperature Converter'),
+        title: const Text('T.C App'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
