@@ -10,61 +10,68 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'T.C App',
+      title: 'Temperature Buddy',
       theme: ThemeData(
-        primarySwatch: Colors.blue,
+        colorScheme: ColorScheme.fromSeed(
+          seedColor: Colors.orange,
+          secondary: Colors.teal,
+        ),
         useMaterial3: true,
       ),
-      home: const TemperatureConverterPage(),
+      home: const TempConverter(),
     );
   }
 }
 
-class TemperatureConverterPage extends StatefulWidget {
-  const TemperatureConverterPage({super.key});
+class TempConverter extends StatefulWidget {
+  const TempConverter({super.key});
 
   @override
-  State<TemperatureConverterPage> createState() => _TemperatureConverterPageState();
+  State<TempConverter> createState() => _TempConverterState();
 }
 
-class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
-  final TextEditingController _temperatureController = TextEditingController();
-  bool _isFahrenheitToCelsius = true;
-  List<ConversionHistory> _history = [];
+class _TempConverterState extends State<TempConverter> {
+  final tempInput = TextEditingController();
+  bool isConvertingFromF = true;
+  List<PastConversion> conversions = [];
 
-  void _convert() {
-    if (_temperatureController.text.isEmpty) return;
+  void convertTemp() {
+    if (tempInput.text.isEmpty) return;
 
     try {
-      final double inputTemp = double.parse(_temperatureController.text);
-      double result;
-      String conversionType;
+      final startTemp = double.parse(tempInput.text);
+      double endTemp;
       
-      if (_isFahrenheitToCelsius) {
-        result = (inputTemp - 32) * 5 / 9;
-        conversionType = 'F to C';
+      if (isConvertingFromF) {
+        // F to C formula: (F - 32) × 5/9
+        endTemp = (startTemp - 32) * 5 / 9;
       } else {
-        result = (inputTemp * 9 / 5) + 32;
-        conversionType = 'C to F';
+        // C to F formula: (C × 9/5) + 32
+        endTemp = (startTemp * 9 / 5) + 32;
       }
 
       setState(() {
-        _history.insert(0, ConversionHistory(
-          inputTemperature: inputTemp,
-          outputTemperature: result,
-          isFahrenheitToCelsius: _isFahrenheitToCelsius,
+        conversions.insert(
+            0,
+            PastConversion(
+              before: startTemp,
+              after: endTemp,
+              startedWithF: isConvertingFromF,
         ));
       });
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter a valid number')),
+        const SnackBar(
+          content: Text('Please enter a valid number'),
+          backgroundColor: Colors.orange,
+        ),
       );
     }
   }
 
   @override
   void dispose() {
-    _temperatureController.dispose();
+    tempInput.dispose();
     super.dispose();
   }
 
@@ -72,7 +79,10 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('T.C App'),
+        title: const Text(
+          'T.C App',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
@@ -81,55 +91,67 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
-              elevation: 4,
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: BorderSide(
+                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                ),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   children: [
+                    Text(
+                      "Convert Temperature!",
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
+                    ),
+                    const SizedBox(height: 16),
                     Row(
                       children: [
                         Expanded(
                           child: RadioListTile<bool>(
-                            title: const Text('°F to °C'),
+                            title: const Text('Fahrenheit to Celsius'),
                             value: true,
-                            groupValue: _isFahrenheitToCelsius,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isFahrenheitToCelsius = value!;
-                              });
-                            },
+                            groupValue: isConvertingFromF,
+                            onChanged: (value) =>
+                                setState(() => isConvertingFromF = value!),
                           ),
                         ),
                         Expanded(
                           child: RadioListTile<bool>(
-                            title: const Text('°C to °F'),
+                            title: const Text('Celsius to Fahrenheit'),
                             value: false,
-                            groupValue: _isFahrenheitToCelsius,
-                            onChanged: (bool? value) {
-                              setState(() {
-                                _isFahrenheitToCelsius = value!;
-                              });
-                            },
+                            groupValue: isConvertingFromF,
+                            onChanged: (value) =>
+                                setState(() => isConvertingFromF = value!),
                           ),
                         ),
                       ],
                     ),
                     TextField(
-                      controller: _temperatureController,
+                      controller: tempInput,
                       keyboardType: TextInputType.number,
                       decoration: InputDecoration(
-                        labelText: 'Enter temperature in ${_isFahrenheitToCelsius ? '°F' : '°C'}',
+                        labelText:
+                            'Enter the degrees in ${isConvertingFromF ? 'Fahrenheit' : 'Celsius'}',
                         border: const OutlineInputBorder(),
                         filled: true,
+                        prefixIcon: const Icon(Icons.thermostat),
                       ),
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton.icon(
-                      onPressed: _convert,
-                      icon: const Icon(Icons.calculate),
-                      label: const Text('Convert Temperature'),
+                      onPressed: convertTemp,
+                      icon: const Icon(Icons.autorenew),
+                      label: const Text('Convert!'),
                       style: ElevatedButton.styleFrom(
                         padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                        textStyle: const TextStyle(fontSize: 18),
                       ),
                     ),
                   ],
@@ -137,30 +159,44 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
               ),
             ),
             const SizedBox(height: 16),
-            const Text(
-              'History',
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
+            Row(
+              children: [
+                const Icon(Icons.history, size: 24),
+                const SizedBox(width: 8),
+                Text(
+                  'History',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+              ],
             ),
             const SizedBox(height: 8),
             Expanded(
               child: Card(
-                elevation: 2,
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: BorderSide(
+                    color:
+                        Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  ),
+                ),
                 child: ListView.builder(
-                  itemCount: _history.length,
+                  itemCount: conversions.length,
                   itemBuilder: (context, index) {
-                    final conversion = _history[index];
+                    final conversion = conversions[index];
                     return ListTile(
                       title: Text(
-                        '${conversion.isFahrenheitToCelsius ? 'F to C' : 'C to F'}: '
-                        '${conversion.inputTemperature.toStringAsFixed(1)} => '
-                        '${conversion.outputTemperature.toStringAsFixed(2)}',
+                        '${conversion.before.toStringAsFixed(1)}° ${conversion.startedWithF ? 'F' : 'C'} = '
+                        '${conversion.after.toStringAsFixed(1)}° ${conversion.startedWithF ? 'C' : 'F'}',
+                        style: const TextStyle(fontSize: 16),
                       ),
                       leading: Icon(
-                        Icons.history,
-                        color: Theme.of(context).primaryColor,
+                        Icons.swap_horiz,
+                        color: Theme.of(context).colorScheme.secondary,
                       ),
                     );
                   },
@@ -174,14 +210,14 @@ class _TemperatureConverterPageState extends State<TemperatureConverterPage> {
   }
 }
 
-class ConversionHistory {
-  final double inputTemperature;
-  final double outputTemperature;
-  final bool isFahrenheitToCelsius;
+class PastConversion {
+  final double before;
+  final double after;
+  final bool startedWithF;
 
-  ConversionHistory({
-    required this.inputTemperature,
-    required this.outputTemperature,
-    required this.isFahrenheitToCelsius,
+  PastConversion({
+    required this.before,
+    required this.after,
+    required this.startedWithF,
   });
 }
