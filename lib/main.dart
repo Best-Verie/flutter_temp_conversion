@@ -10,7 +10,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Temperature Buddy',
+      title: 'T.C App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
           seedColor: Colors.orange,
@@ -45,6 +45,7 @@ class _TempConverterState extends State<TempConverter> {
       if (isConvertingFromF) {
         // F to C formula: (F - 32) × 5/9
         endTemp = (startTemp - 32) * 5 / 9;
+        
       } else {
         // C to F formula: (C × 9/5) + 32
         endTemp = (startTemp * 9 / 5) + 32;
